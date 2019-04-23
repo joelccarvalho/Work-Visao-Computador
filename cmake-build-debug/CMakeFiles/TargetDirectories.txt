@@ -1,0 +1,3 @@
+/Users/joelcarvalho/Desktop/IPCA/VisaoComputador/TP1/TP1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/joelcarvalho/Desktop/IPCA/VisaoComputador/TP1/TP1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/joelcarvalho/Desktop/IPCA/VisaoComputador/TP1/TP1/cmake-build-debug/CMakeFiles/TP1.dir

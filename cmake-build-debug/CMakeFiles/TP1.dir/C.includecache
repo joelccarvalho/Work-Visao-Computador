@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/joelcarvalho/Desktop/IPCA/VisaoComputador/TP1/TP1/main.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+vc.h
+/Users/joelcarvalho/Desktop/IPCA/VisaoComputador/TP1/TP1/vc.h
+
+/Users/joelcarvalho/Desktop/IPCA/VisaoComputador/TP1/TP1/vc.h
+
