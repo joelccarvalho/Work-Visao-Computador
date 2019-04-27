@@ -14,21 +14,20 @@ int countImperfect(IVC *image[], int *colors, int xc, int yc, int kernel, int cP
     pecaDefeituosas = count_imperfect(teste, xc, yc, kernel, colors);
     vc_write_image("teste.ppm", teste);
 
-    if(pecaDefeituosas > 100) {
+    if(pecaDefeituosas > 120) {
         cPecaDefeituosas++;
     }
 
     //vc_write_image("teste.ppm", teste);
     //system("open teste.ppm"); // Output
-
-    //printf("n pixeis: %d\n", pecaDefeituosas);
+    printf("n pixeis: %d\n", pecaDefeituosas);
 
     return cPecaDefeituosas;
 }
 
 // Abrir imagem em RGB, converter para HSV e gravar em novo ficheiro
 void showDetailsByColor(IVC *image[], IVC *imageHSV, char *color, OVC *nObjetos, int numero, IVC *imageCentroPintado, int *colors) {
-    int numeroCor = 0, c = 0, cPecaDefeituosas = 0;
+    int numeroCor = 0, c = 0, cPecaDefeituosas = 0, k, j;
 
     vc_rgb_to_gray(imageHSV, image[2]);
     vc_binary_open(image[2], image[3], 3);
@@ -44,8 +43,8 @@ void showDetailsByColor(IVC *image[], IVC *imageHSV, char *color, OVC *nObjetos,
     printf("|COR: %s\n", color);
     printf("---------------------------------------------------------------------------------------------------------------\n");
 
-    for (int k = 0; k < numeroCor; ++k) {
-        for (int j = 0; j < numero; ++j) {
+    for (k = 0; k < numeroCor; ++k) {
+        for (j = 0; j < numero; ++j) {
             if ((nObjetosCor[k].xc >= nObjetos[j].x && nObjetosCor[k].xc <= nObjetos[j].x + nObjetos[j].width) &&
             (nObjetosCor[k].yc >= nObjetos[j].y && nObjetosCor[k].yc <= nObjetos[j].y + nObjetos[j].height))
             {
@@ -58,7 +57,7 @@ void showDetailsByColor(IVC *image[], IVC *imageHSV, char *color, OVC *nObjetos,
                 }
             }
         }
-    }
+    }printf("|numero cor: %d\n", numeroCor);
 
     printf("---------------------------------------------------------------------------------------------------------------\n");
     printf("|TOTAL DE DEFEITUOSAS: %d\n", cPecaDefeituosas);
@@ -85,10 +84,10 @@ int processImage(IVC *image[]) {
     imageHSVHelp = vc_image_new(image[1]->width, image[1]->height, image[1]->channels, image[1]->levels);
     memcpy(imageHSVHelp->data, image[1]->data, image[1]->width * image[1]->height * image[1]->channels);
 
-    vc_hsv_segmentation(image[1], 10, 45, 0, 40, 60, 90); // remover fundo e ver peças a branco
-    vc_rgb_to_gray(image[1], image[2]);
+    vc_hsv_segmentation(image[1], 10, 45, 0, 40, 55, 90); // remover fundo e ver peças a branco
+    vc_rgb_to_gray(image[1], image[2]); // depois da segmentação
     vc_gray_negative(image[2]);
-    vc_binary_close(image[2], image[3], 3);
+    vc_binary_open(image[2], image[3], 3);
 
     nObjetos = vc_binary_blob_labelling(image[3], image[2], &numero);
     vc_binary_blob_info(image[2], nObjetos, numero);
@@ -107,8 +106,8 @@ int processImage(IVC *image[]) {
     printf("|TOTAL DE PEÇAS: %d\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t  |\n", c);
     printf("-------------------------------------FIM GLOBAL----------------------------------------------------------------\n\n\n");
 
-    // Declarar array de imagens HSV a gerar
-    IVC *imageHSV[c];
+    // Declarar array de imagens HSV a gerar (apont de apont)
+    IVC **imageHSV = (IVC**)malloc(c * sizeof(IVC *));
 
     // Criar imagens HSV para cada cor
     for (j = 0; j < c; j++)
@@ -124,26 +123,30 @@ int processImage(IVC *image[]) {
     memcpy(imageCentroPintado->data, image[0]->data, image[0]->width * image[0]->height * image[0]->channels);
 
     // Mostrar os detalhes por cada cor
-    colors = vc_hsv_segmentation(imageHSV[0], 30, 50, 35, 55, 80, 100); // Big Blind
+    colors = vc_hsv_segmentation(imageHSV[0], 35, 50, 35, 55, 80, 100); // Big Blind
     showDetailsByColor(image, imageHSV[0], "Big Blind", nObjetos, numero, imageCentroPintado, colors);
 
     colors = vc_hsv_segmentation(imageHSV[1], 245, 255, 40, 50, 50, 70); // Small Blind
     showDetailsByColor(image, imageHSV[1], "Small Blind", nObjetos, numero, imageCentroPintado, colors);
 
-    colors = vc_hsv_segmentation(imageHSV[2], 340, 360, 50, 60, 65, 80); // Vermelho
+    colors = vc_hsv_segmentation(imageHSV[2], 340, 360, 50, 70, 55, 80); // Vermelho
     showDetailsByColor(image, imageHSV[2], "Vermelho", nObjetos, numero, imageCentroPintado, colors);
 
-    colors = vc_hsv_segmentation(imageHSV[3], 180, 218, 70, 100, 40, 70); // Azul
+    colors = vc_hsv_segmentation(imageHSV[3], 200, 220, 60, 90, 45, 60); // Azul
     showDetailsByColor(image, imageHSV[3], "Azul", nObjetos, numero, imageCentroPintado, colors);
 
-    colors = vc_hsv_segmentation(imageHSV[4], 190, 210, 0, 20, 80, 95); // Branca
-    showDetailsByColor(image, imageHSV[4], "Branco", nObjetos, numero, imageCentroPintado, colors);
+    colors = vc_hsv_segmentation(imageHSV[4], 180, 190, 70, 100, 45, 70); // Ciano
+    showDetailsByColor(image, imageHSV[4], "Ciano", nObjetos, numero, imageCentroPintado, colors);
 
-    colors = vc_hsv_segmentation(imageHSV[5], 205, 220, 20, 80, 20, 45); // Preta
-    showDetailsByColor(image, imageHSV[5], "Preto", nObjetos, numero, imageCentroPintado, colors);
+    colors = vc_hsv_segmentation(imageHSV[5], 40, 210, 0, 20, 80, 95); // Branca
+    showDetailsByColor(image, imageHSV[5], "Branco", nObjetos, numero, imageCentroPintado, colors);
+
+    colors = vc_hsv_segmentation(imageHSV[6], 180, 250, 15, 80, 15, 45); // Preta
+    showDetailsByColor(image, imageHSV[6], "Preto", nObjetos, numero, imageCentroPintado, colors);
 
     // Mostrar imagem com o centro pintado
     vc_write_image("centroPintado.ppm", imageCentroPintado);
+    vc_write_image("image1.ppm", image[1]);
 
     vc_image_free(imageCentroPintado);
     vc_image_free(image[0]);
@@ -152,20 +155,22 @@ int processImage(IVC *image[]) {
     vc_image_free(image[3]);
     vc_image_free(imageHSVHelp);
 
-
     for (k = 0; k < c; k++)
     {
         vc_image_free(imageHSV[k]);
     }
+
+    free(image);
+    free(imageHSV);
 }
 
 // Processar imagens
 int main(void)
 {
     int n = 4;
-    IVC *image[n];
+    IVC **image = (IVC**)malloc(n * sizeof(IVC *));
 
-    image[0] = vc_read_image("../Imagens/Imagem10.ppm");
+    image[0] = vc_read_image("../Imagens/Imagem09.ppm");
     if (image[0] == NULL)
     {
         printf("ERROR -> vc_read_image():\n\tFile not found!\n");
@@ -175,9 +180,10 @@ int main(void)
 
     processImage(image);
 
-    system("open ../Imagens/Imagem10.ppm"); // Input
+    system("open ../Imagens/Imagem09.ppm"); // Input
     system("open imgHSV.ppm"); // Output
     system("open centroPintado.ppm"); // Output
+    system("open image1.ppm"); // Output
 
     printf("Press any key to exit...\n");
     getchar();
