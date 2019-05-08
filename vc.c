@@ -8,15 +8,12 @@
 //             [  DUARTE DUQUE - dduque@ipca.pt  ]
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include "vc.h"
 #include <math.h>
-
-
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //            FUN��ES: ALOCAR E LIBERTAR UMA IMAGEM
@@ -187,7 +184,6 @@ void bit_to_unsigned_char(unsigned char *databit, unsigned char *datauchar, int 
 	}
 }
 
-
 IVC *vc_read_image(char *filename)
 {
 	FILE *file = NULL;
@@ -307,7 +303,6 @@ IVC *vc_read_image(char *filename)
 	return image;
 }
 
-
 int vc_write_image(char *filename, IVC *image)
 {
 	FILE *file = NULL;
@@ -401,7 +396,6 @@ int vc_rgb_to_gray(IVC *src, IVC *dst) {
 
 }
 
-
 // Conversão de RGB para HSV
 int vc_rgb_to_hsv(IVC *src)
 {
@@ -476,7 +470,6 @@ int vc_rgb_to_hsv(IVC *src)
     return 1;
 }
 
-
 int paint_center(IVC *src, IVC *dst, int xc, int yc, int kernel){
     unsigned char *data = (unsigned char *)dst->data;
     int width = src->width;
@@ -516,7 +509,7 @@ int paint_center(IVC *src, IVC *dst, int xc, int yc, int kernel){
 	return 1;
 }
 
-int draw_box(IVC *src, IVC *dst, int posx, int posy, int w, int h, int kernel){
+int draw_box(IVC *src, IVC *dst, int posx, int posy, int w, int h, int kernel, char *color){
     unsigned char *data = (unsigned char *)dst->data;
     int channels = src->channels;
     int bytesperline= src->width * src->channels;
@@ -537,15 +530,51 @@ int draw_box(IVC *src, IVC *dst, int posx, int posy, int w, int h, int kernel){
                     if ((y + ky >= posy) && (y + ky < (posy+h)) && (x + kx >= posx) && (x + kx < (posx+w))) {
                         posk = (y + ky) * bytesperline + (x + kx) * channels;
 
-                        // Lado esq vertical || Lado direito vertical || Lado esq horizontal || Lado direito horizontal
-                        //if (x == posx || x == (posx+w) || y == posy || y == (posy + h))
-                        //if(x == (posx + w) && y == (posy+h))
-						//if(x == (posx) && y == (posy))
-						if (/*x <= posx || y <= posy || x == (posx+h) || */y >= (posy+w))
+						if (x <= posx+offset || y <= posy+offset || x > (posx-offset+w) || y > (posy-offset+h))
                         {
-							data[posk]     = 255;
-							data[posk + 1] = 0;
-							data[posk + 2] = 0;
+
+							if (strcmp(color, "Vermelho") == 0)
+							{
+								data[posk]     = 255;
+								data[posk + 1] = 0;
+								data[posk + 2] = 0;
+							}
+							else if (strcmp(color, "Preto") == 0)
+							{
+								data[posk]     = 0;
+								data[posk + 1] = 0;
+								data[posk + 2] = 0;
+							}
+							else if (strcmp(color, "Big Blind") == 0)
+							{
+								data[posk]     = 91;
+								data[posk + 1] = 84;
+								data[posk + 2] = 53;
+							}
+							else if (strcmp(color, "Small Blind") == 0)
+							{
+								data[posk]     = 50;
+								data[posk + 1] = 0;
+								data[posk + 2] = 85;
+							}
+							else if (strcmp(color, "Azul") == 0)
+							{
+								data[posk]     = 5;
+								data[posk + 1] = 0;
+								data[posk + 2] = 100;
+							}
+							else if (strcmp(color, "Ciano") == 0)
+							{
+								data[posk]     = 3;
+								data[posk + 1] = 58;
+								data[posk + 2] = 66;
+							}
+							else if (strcmp(color, "Branco") == 0)
+							{
+								data[posk]     = 255;
+								data[posk + 1] = 255;
+								data[posk + 2] = 255;
+							}
                         }
                     }
                 }
@@ -589,13 +618,11 @@ int count_imperfect(IVC *src, int xc, int yc, int kernel, int *colors) {
 
 							// Vizinhos são da mesma cor
 							if ((h > *(colors + 0)) && (h <= *(colors + 1)) && (s >= *(colors + 2)) && (s <= *(colors + 3)) && (v >= *(colors + 4)) && (v <= *(colors + 5))) {
-                                //continue;
 								data[posk]     = 0;
 								data[posk + 1] = 0;
 								data[posk + 2] = 0;
 							}
 							else { // Vizinhos de cores diferentes
-								//continue;
                                 neighbors_account++;
 								data[posk]     = 255;
 								data[posk + 1] = 0;
@@ -607,33 +634,9 @@ int count_imperfect(IVC *src, int xc, int yc, int kernel, int *colors) {
 			}
 		}
 	}
-	/*
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            posk = y * bytesperline + x * channels;
-
-            // Converter
-            h = ((float) data[posk]) / 255.0f * 360.0f;
-            s = ((float) data[posk + 1]) / 255.0f * 100.0f;
-            v = ((float) data[posk + 2]) / 255.0f * 100.0f;
-
-            // Peças a branco
-            if ((h > *(colors + 0)) && (h <= *(colors + 1)) && (s >= *(colors + 2)) && (s <= *(colors + 3)) && (v >= *(colors + 4)) && (v <= *(colors + 5))) {
-                data[posk]     = 255;
-                data[posk + 1] = 255;
-                data[posk + 2] = 255;
-            } else // Pintar a preto
-            {
-                data[posk]     = 0;
-                data[posk + 1] = 0;
-                data[posk + 2] = 0;
-            }
-        }
-    }*/
 
 	return neighbors_account;
 }
-
 
 // hmin,hmax = [0, 360]; smin,smax = [0, 100]; vmin,vmax = [0, 100]
 int *vc_hsv_segmentation(IVC *src, int hmin, int hmax, int smin, int smax, int vmin, int vmax)
@@ -690,46 +693,6 @@ int vc_binary_open(IVC *src, IVC *dst, int kernel) {
 	vc_image_free(temp);
 
 	return ret;
-}
-
-
-int vc_gray_to_binary(IVC * src, IVC * dst, int threshold)
-{
-    unsigned char *datasrc = (unsigned char *)src->data;
-    unsigned char *datadst = (unsigned char *)dst->data;
-    int width = src->width;
-    int height = src->height;
-    int bytesperline_src = src->width * src->channels;
-    int bytesperline_dst = dst->width * dst->channels;
-    int channels_src = src->channels;
-    int channels_dst = dst->channels;
-    long int pos_src, pos_dst;
-    unsigned char brilho;
-    int x, y;
-
-    // Verficação de erros.
-    if ((src->width <= 0) || (src->height <= 0) || (src->data == NULL)) return 0;
-    if ((src->width != dst->width) || (src->height != dst->height)) return 0;
-    if ((src->channels != 1) || (dst->channels != 1)) return 0;
-
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            pos_src = y * bytesperline_src + x * channels_src;
-            pos_dst = y * bytesperline_dst + x * channels_dst;
-
-            // Indice que percorre x e y que dá o brilho
-            brilho = datasrc[pos_src];
-            if (brilho < threshold) {
-                datadst[pos_dst] = 0;
-            }
-            else {
-                datadst[pos_dst] = 255;
-            }
-        }
-    }
-    return 1;
 }
 
 int vc_gray_negative(IVC *srcdst){
@@ -1022,8 +985,6 @@ OVC* vc_binary_blob_labelling(IVC *src, IVC *dst, int *nlabels)
 			}
 		}
 	}
-
-	//printf("\nMax Label = %d\n", label);
 
 	// Contagem do n�mero de blobs
 	// Passo 1: Eliminar, da tabela, etiquetas repetidas

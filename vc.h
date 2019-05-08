@@ -9,14 +9,12 @@
 
 
 #define VC_DEBUG
-#define MAX(a, b) (a > b ? a : b)
 #define MIN(a, b) (a < b ? a : b)
-
+#define MAX(a, b) (a > b ? a : b)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                   ESTRUTURA DE UMA IMAGEM
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 
 typedef struct {
 	unsigned char *data;
@@ -38,7 +36,6 @@ typedef struct {
     int label;					// Etiqueta
 } OVC;
 
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //                    PROT�TIPOS DE FUN��ES
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -59,7 +56,7 @@ int vc_binary_close(IVC *src, IVC *dst, int kernel);
 int vc_binary_dilate(IVC *src, IVC *dst, int kernel);
 int vc_binary_erode(IVC *src, IVC *dst, int kernel);
 int paint_center(IVC *src, IVC *dst, int xc, int yc, int kernel);
-int draw_box(IVC *src, IVC *dst, int posx, int posy, int w, int h, int kernel);
+int draw_box(IVC *src, IVC *dst, int posx, int posy, int w, int h, int kernel, char *color);
 int count_imperfect(IVC *src, int xc, int yc, int kernel, int *colors);
 
 // BLOBS
